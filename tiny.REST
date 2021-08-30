@@ -2,3 +2,6 @@ GET http://localhost:8080/urls HTTP/1.1
 
 ###
 GET http://localhost:8080/urls/b2xVn2
+
+###
+GET http://localhost:8080/u/b2xVn2
