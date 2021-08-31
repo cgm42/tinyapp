@@ -43,12 +43,20 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.post("/urls/:id", (req, res) => {
+  const urlShort = generateRandomString();
+  urlDatabase[urlShort] = req.body.urlLong;
+  res.redirect(`/urls/${urlShort}`);
+});
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   const urlShort = generateRandomString();
   urlDatabase[urlShort] = req.body.urlLong;
   res.redirect(`/urls/${urlShort}`);
 });
+
+
 
 app.get("/u/:shortURL", (req, res) => {
   res.redirect(`${urlDatabase[req.params.shortURL]}`);
