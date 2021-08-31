@@ -28,7 +28,7 @@
             <td><a href='#'><%= url %></a></td>
             <td><a><%= urlDatabase[url] %></a></td>
             
-            <td><a href='urls/<%= url %>' ><input class="btn btn-primary" type=button value='Edit'></a></td>
+            <td><a href='<%= url %>' ><input class="btn btn-primary" type=button value='Edit'></a></td>
             <td><form method="POST" action="urls/<%= url %>/delete">
             <button type="submit" class="btn btn-primary">Delete</button>
             </form></td>

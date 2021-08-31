@@ -39,15 +39,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+app.post("/urls/:id", (req, res) => { 
+  urlDatabase[req.params.id] = req.body.urlLong;
+  res.redirect(`/urls/`);
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.post("/urls/:id", (req, res) => {
-  const urlShort = generateRandomString();
-  urlDatabase[urlShort] = req.body.urlLong;
-  res.redirect(`/urls/${urlShort}`);
-});
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
