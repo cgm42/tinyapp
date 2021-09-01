@@ -27,8 +27,8 @@ const users = {
   },
   "uQXq7o": {
     id: "uQXq7o", 
-    email: "xsdf2@example.com", 
-    password: "sdfsdf"
+    email: "123@321", 
+    password: "123"
   }
 }
 app.get("/hello", (req, res) => {
@@ -48,6 +48,10 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  const user_id = req.cookies['user_id'];
+  if (user_id === undefined || !lookUpUserById(user_id)) {
+    res.redirect('/login');
+  }
   res.render('urls_new', {
     user: users[req.cookies["user_id"]],
   });
@@ -63,14 +67,20 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (req.cookies['user_id'] !== undefined) res.redirect('/urls');
-  res.render('register', {
+  const user_id = req.cookies['user_id'];
+  if (user_id !== undefined && lookUpUserById(user_id)) {
+    res.redirect('/urls');
+  }
+    res.render('register', {
     user: users[req.cookies["user_id"]],
   });
 });
 
 app.get("/login", (req, res) => {
-  if (req.cookies['user_id'] !== undefined) res.redirect('/urls');
+  const user_id = req.cookies['user_id'];
+  if (user_id !== undefined && lookUpUserById(user_id)) {
+    res.redirect('/urls');
+  }
   res.render('login', {
     user: users[req.cookies["user_id"]],
   });
@@ -105,7 +115,7 @@ app.post('/login', (req, res) => {
   } else if (!passwordCorrect(email, password)) {
     return res.sendStatus(403);
   }
-  const user_id = idFinder(email);
+  const user_id = lookUpIdByEmail(email);
   res.cookie("user_id", user_id);
   res.redirect('urls');
 })
@@ -125,8 +135,8 @@ app.post('/register', (req, res) => {
   console.log(users);
   const email = req.body.email;
   const password = req.body.password;
-  if (email === "" || password == "") return res.sendStatus(404);
-  if (!emailDontExist(email)) return res.sendStatus(400);
+  if (email === "" || password == "") return res.status(404).send('Email or password invalid');
+  if (!emailDontExist(email)) return res.status(400).send('Invalid email');
   const id = generateRandomString();
   users[id] = {};
   users[id]['id'] = id;
@@ -172,11 +182,18 @@ const passwordCorrect = (email, password) => {
   return false;
 }
 
-const idFinder = (email) => {
+const lookUpIdByEmail = (email) => {
   for (const userKey in users) {
     if (users[userKey]['email'] == email) {
       return users[userKey]['id'];
     }
   }
-  return;
+  return false;
+}
+
+const lookUpUserById = (id) => {
+  if (users[userKey] !== undefined) {
+      return users[userKey];
+  }
+  return false;
 }
