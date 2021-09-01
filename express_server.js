@@ -99,9 +99,9 @@ app.post('/login', (req, res) => { //to be updated
   const email = req.body.email;
   const password = req.body.password;
   if (emailDontExist(email)) {
-    res.sendStatus(403);
+    return res.sendStatus(403);
   } else if (!passwordCorrect(email, password)) {
-    res.sendStatus(403);
+    return res.sendStatus(403);
   }
   const user_id = idFinder(email);
   res.cookie("user_id", user_id);
@@ -109,8 +109,13 @@ app.post('/login', (req, res) => { //to be updated
 })
 
 app.post('/logout', (req, res) => {
-  const username = req.body.username;
-  res.clearCookie("user_id");
+  const user_id = req.body.user_id;
+  console.log(user_id);
+  for (let key in req.cookies) {
+    if (key === 'user_id' && req.cookies[key] === user_id){
+      res.clearCookie(key);
+    }
+  }
   res.redirect('urls');
 })
 

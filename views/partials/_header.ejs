@@ -21,7 +21,7 @@
           <% } else { %> 
           <div class="nav-item nav-link" >Logged in as <%= user['email'] %>!</div>
           <form  class="nav justify-content-end" action="/logout" method="POST">
-            <input type="hidden" class="form-control" name="username" value="<%= user['email'] %>">
+            <input type="hidden" class="form-control" name="user_id" value="<%= user['id'] %>">
             <button class="btn btn-outline-dark" type="submit">Sign out</button>
           </form>
         </div>
