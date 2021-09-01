@@ -4,20 +4,26 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" href="/urls">My URLs</a>
+      <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+    </div>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
         <% if (username === undefined) { %>
-        <form action="/login" method="POST">
-          <input type='text' name='username' placeholder='My name is...'>
-          <button type="submit" >Sign in</button>
-        </form> 
+          <div class="nav ">
+            <form  action="/login" method="POST">
+              <div class="form-row nav-item">
+              <input type='text' name='username' placeholder='My name is...'>
+              <button class="btn btn-outline-dark nav-item" type="submit" >Sign in</button>
+            </form> 
+          </div>
           <% } else { %> 
-          <div class="nav-item nav-link" >Welcome, <%= username %></div>
-          <form action="/logout" method="POST">
-            <input type="hidden" name="username" value="<%= username %>">
-            <button type="submit">Sign out</button>
+          <div class="nav-item nav-link" >Logged in as <%= username %>!</div>
+          <form  class="nav justify-content-end" action="/logout" method="POST">
+          
+            <input type="hidden" class="form-control" name="username" value="<%= username %>">
+            <button class="btn btn-outline-dark" type="submit">Sign out</button>
+          
           </form>
           <% } %>
           </label>
