@@ -63,12 +63,14 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  if (req.cookies['user_id'] !== undefined) res.redirect('/urls');
   res.render('register', {
     user: users[req.cookies["user_id"]],
   });
 });
 
 app.get("/login", (req, res) => {
+  if (req.cookies['user_id'] !== undefined) res.redirect('/urls');
   res.render('login', {
     user: users[req.cookies["user_id"]],
   });
@@ -95,7 +97,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${urlShort}`);
 });
 
-app.post('/login', (req, res) => { //to be updated
+app.post('/login', (req, res) => { 
   const email = req.body.email;
   const password = req.body.password;
   if (emailDontExist(email)) {
