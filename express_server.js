@@ -10,8 +10,12 @@ app.use(cookieParser())
 app.use(morgan('dev'));
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL:"http://www.lighthouselabs.ca",
+             userID: "user2RandomID"},
+  "9sm5xK": {longURL:"http://www.oku.club",
+             userID: "uQXq7o"},
+  "8as3xW": {longURL:"http://www.plannedparenthood.org",
+             userID: "uQXq7o"},
 };
 
 const users = {
@@ -37,20 +41,23 @@ app.get("/hello", (req, res) => {
 
 
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(`${urlDatabase[req.params.shortURL]}`);
+  if (urlDatabase[req.params.shortURL] === undefined) res.status(404).send('URL not found');
+  res.redirect(`${urlDatabase[req.params.shortURL]['longURL']}`);
 });
 
 app.get("/urls", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const userURLDatabase = urlsForUser(user_id);
   res.render('urls_index', {
-    urlDatabase,
-    user: users[req.cookies["user_id"]],
+    userURLDatabase,
+    user: users[user_id],
   });
 });
 
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies['user_id'];
   if (user_id === undefined || !lookUpUserById(user_id)) {
-    res.redirect('/login');
+    return res.redirect('/login');
   }
   res.render('urls_new', {
     user: users[req.cookies["user_id"]],
@@ -60,7 +67,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
    const templateVars = {
     urlShort: req.params.shortURL,
-    urlLong: urlDatabase[req.params.shortURL],
+    urlLong: urlDatabase[req.params.shortURL]['longURL'],
     user: users[req.cookies["user_id"]],
    }
   res.render('urls_show', templateVars);
@@ -69,7 +76,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
   const user_id = req.cookies['user_id'];
   if (user_id !== undefined && lookUpUserById(user_id)) {
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
     res.render('register', {
     user: users[req.cookies["user_id"]],
@@ -79,7 +86,7 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const user_id = req.cookies['user_id'];
   if (user_id !== undefined && lookUpUserById(user_id)) {
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
   res.render('login', {
     user: users[req.cookies["user_id"]],
@@ -87,12 +94,14 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  delete urlDatabase[req.params.shortURL]['longURL'];
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id", (req, res) => { 
-  urlDatabase[req.params.id] = req.body.urlLong;
+
+  urlDatabase[req.params.id]['longURL'] = req.body.urlLong;
+  urlDatabase[req.params.id]['userID'] = req.cookies['user_id'];
   res.redirect(`/urls/`);
 });
 
@@ -102,8 +111,12 @@ app.get("/urls.json", (req, res) => {
 
 
 app.post("/urls", (req, res) => {
+  const user_id = req.cookies['user_id'];
+  if (user_id === undefined && !lookUpUserById(user_id)) {
+    return res.redirect('/login');
+  }
   const urlShort = generateRandomString();
-  urlDatabase[urlShort] = req.body.urlLong;
+  urlDatabase[urlShort]['longURL'] = req.body.urlLong;
   res.redirect(`/urls/${urlShort}`);
 });
 
@@ -111,7 +124,7 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (emailDontExist(email)) {
-    return res.sendStatus(403);
+    return res.status(403).send("");
   } else if (!passwordCorrect(email, password)) {
     return res.sendStatus(403);
   }
@@ -136,7 +149,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (email === "" || password == "") return res.status(404).send('Email or password invalid');
-  if (!emailDontExist(email)) return res.status(400).send('Invalid email');
+  if (!emailDontExist(email)) return res.status(400).send('Email already registered');
   const id = generateRandomString();
   users[id] = {};
   users[id]['id'] = id;
@@ -196,4 +209,16 @@ const lookUpUserById = (id) => {
       return users[userKey];
   }
   return false;
+}
+
+const urlsForUser = (userID) => {
+  const result = {}
+  for (const shortURLKey in urlDatabase) {
+    if (urlDatabase[shortURLKey]['userID'] === userID) {
+      result[shortURLKey] = {};
+      result[shortURLKey]['longURL'] = urlDatabase[shortURLKey]['longURL'];
+      result[shortURLKey]['userID'] = urlDatabase[shortURLKey]['userID'];
+    }
+  }
+  return result;  
 }

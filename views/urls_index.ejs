@@ -23,17 +23,22 @@
         </tr>
       </thead>
       <tbody>
-        <% for(let url in urlDatabase) { %>
+        <% if (user === undefined) {%>  
+          <div class="alert alert-danger" role="alert">
+            Not logged in!
+          </div>
+          <% } else {%>
+        <% for(let url in userURLDatabase) { %>
           <tr>
             <td><a href='#'><%= url %></a></td>
-            <td><a><%= urlDatabase[url] %></a></td>
+            <td><a><%= userURLDatabase[url]['longURL'] %></a></td>
             
             <td><a href='urls/<%= url %>' ><button class="btn btn-primary">Edit</button> </a></td>
             <td><form method="POST" action="urls/<%= url %>/delete">
             <button type="submit" class="btn btn-primary">Delete</button>
             </form></td>
           </tr>
-        <% } %>
+        <% }}%>
       </tbody>
     </table>
   </main>
