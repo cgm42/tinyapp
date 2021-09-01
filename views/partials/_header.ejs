@@ -12,19 +12,17 @@
       <div class="navbar-nav">
       <% if (user === undefined) { %>
           <div class="nav justify-content-end">
-            <form  action="/login" method="POST">
+            <!-- <form  action="/login" method="POST">
               <div class="form-row nav-item">
               <input type='text' name='username' placeholder='My name is...'>
               <button class="btn btn-outline-dark nav-item" type="submit" >Sign in</button>
               </div>
-            </form> 
+            </form>  -->
           <% } else { %> 
           <div class="nav-item nav-link" >Logged in as <%= user['email'] %>!</div>
           <form  class="nav justify-content-end" action="/logout" method="POST">
-          
             <input type="hidden" class="form-control" name="username" value="<%= user['email'] %>">
             <button class="btn btn-outline-dark" type="submit">Sign out</button>
-          
           </form>
         </div>
           <% } %>

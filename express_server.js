@@ -68,6 +68,12 @@ app.get("/register", (req, res) => {
   });
 });
 
+app.get("/login", (req, res) => {
+  res.render('login', {
+    user: users[req.cookies["user_id"]],
+  });
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect(`/urls`);
@@ -84,15 +90,21 @@ app.get("/urls.json", (req, res) => {
 
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   const urlShort = generateRandomString();
   urlDatabase[urlShort] = req.body.urlLong;
   res.redirect(`/urls/${urlShort}`);
 });
 
-app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie("user_id", username);
+app.post('/login', (req, res) => { //to be updated
+  const email = req.body.email;
+  const password = req.body.password;
+  if (emailDontExist(email)) {
+    res.sendStatus(403);
+  } else if (!passwordCorrect(email, password)) {
+    res.sendStatus(403);
+  }
+  const user_id = idFinder(email);
+  res.cookie("user_id", user_id);
   res.redirect('urls');
 })
 
@@ -106,8 +118,8 @@ app.post('/register', (req, res) => {
   console.log(users);
   const email = req.body.email;
   const password = req.body.password;
-  if (email === "" || password == "") res.sendStatus(404);
-  if (!emailUnique(email)) res.sendStatus(400);
+  if (email === "" || password == "") return res.sendStatus(404);
+  if (!emailDontExist(email)) return res.sendStatus(400);
   const id = generateRandomString();
   users[id] = {};
   users[id]['id'] = id;
@@ -137,9 +149,27 @@ const generateRandomString = () => {
   return result.join('');
 }
 
-const emailUnique = (email) => {
+const emailDontExist = (email) => {
   for (const userKey in users) {
     if (users[userKey]['email'] == email) return false;
   }
   return true;
+}
+
+const passwordCorrect = (email, password) => {
+  for (const userKey in users) {
+    if (users[userKey]['email'] == email && users[userKey]['password'] == password) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const idFinder = (email) => {
+  for (const userKey in users) {
+    if (users[userKey]['email'] == email) {
+      return users[userKey]['id'];
+    }
+  }
+  return;
 }
