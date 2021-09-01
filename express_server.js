@@ -93,14 +93,15 @@ app.get("/login", (req, res) => {
   });
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL]['longURL'];
+app.post("/urls/:shortURL/delete", (req, res) => { //to be updated
+  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) return res.status(`401`).send('No access');
+  delete urlDatabase[req.params.shortURL];
+  console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:id", (req, res) => { 
-
-  urlDatabase[req.params.id]['longURL'] = req.body.urlLong;
+app.post("/urls/:id", (req, res) => { //to be updated
+  if (req.cookies['user_id'] !== urlDatabase[req.params.id]['userID']) return res.status(`401`).send('No access');  urlDatabase[req.params.id]['longURL'] = req.body.urlLong;
   urlDatabase[req.params.id]['userID'] = req.cookies['user_id'];
   res.redirect(`/urls/`);
 });
