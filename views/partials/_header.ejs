@@ -4,19 +4,20 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="navbar-nav">
-      <a class="nav-item nav-link" href="/urls">My URLs</a>
-      <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-    </div>
-    <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
-        <% if (username === undefined) { %>
-          <div class="nav ">
+    <div class="collapse navbar-collapse justify-content-between " id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
+      <div class="navbar-nav">
+      <% if (username === undefined) { %>
+          <div class="nav justify-content-end">
             <form  action="/login" method="POST">
               <div class="form-row nav-item">
               <input type='text' name='username' placeholder='My name is...'>
               <button class="btn btn-outline-dark nav-item" type="submit" >Sign in</button>
+              </div>
             </form> 
-          </div>
           <% } else { %> 
           <div class="nav-item nav-link" >Logged in as <%= username %>!</div>
           <form  class="nav justify-content-end" action="/logout" method="POST">
@@ -25,7 +26,9 @@
             <button class="btn btn-outline-dark" type="submit">Sign out</button>
           
           </form>
+        </div>
           <% } %>
+        </div>
           </label>
          
       </div>
