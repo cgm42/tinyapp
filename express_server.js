@@ -103,8 +103,11 @@ app.post('/logout', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
+  console.log(users);
   const email = req.body.email;
   const password = req.body.password;
+  if (email === "" || password == "") res.sendStatus(404);
+  if (!emailUnique(email)) res.sendStatus(400);
   const id = generateRandomString();
   users[id] = {};
   users[id]['id'] = id;
@@ -132,4 +135,11 @@ const generateRandomString = () => {
     result.push(rand);
   }
   return result.join('');
+}
+
+const emailUnique = (email) => {
+  for (const userKey in users) {
+    if (users[userKey]['email'] == email) return false;
+  }
+  return true;
 }
