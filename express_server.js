@@ -1,23 +1,26 @@
+const cookieSession = require('cookie-session');
 const express = require("express");
 const app = express();
 const morgan = require('morgan');
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
-app.use(cookieParser())
+app.use(cookieSession({
+  name: 'session',
+  keys: ["meowmIsHere"],
+}))
 app.use(morgan('dev'));
 
 const urlDatabase = {
   "b2xVn2": {longURL:"http://www.cbc.ca",
              userID: "user2RandomID"},
   "9sm5xK": {longURL:"http://www.oku.club",
-             userID: "uQXq7o"},
+             userID: "lmFOgr"},
   "8as3xW": {longURL:"http://www.npr.org",
-             userID: "uQXq7o"},
+             userID: "lmFOgr"},
 };
 
 const users = {
@@ -39,7 +42,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies["user_id"];
+  const user_id = req.session.user_id;
   const userURLDatabase = urlsForUser(user_id);
   res.render('urls_index', {
     userURLDatabase,
@@ -48,61 +51,61 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user_id = req.cookies['user_id'];
+  const user_id = req.session.user_id;
   if (user_id === undefined || !lookUpUserById(user_id)) {
     return res.redirect('/login');
   }
   res.render('urls_new', {
-    user: users[req.cookies["user_id"]],
+    user: users[req.session.user_id],
   });
 });
 
-app.get("/urls/:shortURL", (req, res) => {//to be updated
-  if (req.cookies['user_id'] === undefined) {
+app.get("/urls/:shortURL", (req, res) => {
+  if (req.session.user_id === undefined) {
     return res.status(`401`).send('Not logged in');
   }
   if (urlDatabase[req.params.shortURL] === undefined) {
     return res.status(`401`).send('Invalid URL');
   }
-  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) {
+  if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
     return res.status(`401`).send('Access only granted to URL creator');  
   }
    const templateVars = {
     urlShort: req.params.shortURL,
     urlLong: urlDatabase[req.params.shortURL]['longURL'],
-    user: users[req.cookies["user_id"]],
+    user: users[req.session.user_id],
    }
   res.render('urls_show', templateVars);
 });
 
 app.get("/register", (req, res) => {
-  const user_id = req.cookies['user_id'];
+  const user_id = req.session.user_id;
   if (user_id !== undefined && lookUpUserById(user_id)) {
     return res.redirect('/urls');
   }
     res.render('register', {
-    user: users[req.cookies["user_id"]],
+    user: users[req.session.user_id],
   });
 });
 
 app.get("/login", (req, res) => {
-  const user_id = req.cookies['user_id'];
+  const user_id = req.session.user_id;
   if (user_id !== undefined && lookUpUserById(user_id)) {
     return res.redirect('/urls');
   }
   res.render('login', {
-    user: users[req.cookies["user_id"]],
+    user: users[req.session.user_id],
   });
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => { 
-  if (req.cookies['user_id']) {
+  if (!req.session.user_id) {
     return res.status(`401`).send('Not logged in');
   }
-  if (urlDatabase[req.params.shortURL]) {
+  if (!urlDatabase[req.params.shortURL]) {
     return res.status(`401`).send('Invalid URL');
   }
-  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) {
+  if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
     return res.status(`401`).send('Access only granted to URL creator');  
   }
   delete urlDatabase[req.params.shortURL];
@@ -110,18 +113,19 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:shortURL", (req, res) => { 
-  if (req.cookies['user_id']) {
+app.post("/urls/:shortURL", (req, res) => { //check for bugs
+  if (req.session.user_id === undefined) {
     return res.status(`401`).send('Not logged in');
   }
-  if (urlDatabase[req.params.shortURL]) {
+  if (urlDatabase[req.params.shortURL] === undefined) {
     return res.status(`401`).send('Invalid URL');
   }
-  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) {
+  if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
     return res.status(`401`).send('Access only granted to URL creator');  
   }
-  urlDatabase[req.params.id]['longURL'] = req.body.urlLong;
-  urlDatabase[req.params.id]['userID'] = req.cookies['user_id'];
+  urlDatabase[req.params.shortURL] = {};
+  urlDatabase[req.params.shortURL]['longURL'] = req.body.urlLong;
+  urlDatabase[req.params.shortURL]['userID'] = req.session.user_id;
   res.redirect(`/urls/`);
 });
 
@@ -131,12 +135,14 @@ app.get("/urls.json", (req, res) => {
 
 
 app.post("/urls", (req, res) => {
-  const user_id = req.cookies['user_id'];
+  const user_id = req.session.user_id;
   if (user_id === undefined && !lookUpUserById(user_id)) {
     return res.redirect('/login');
   }
   const urlShort = generateRandomString();
+  urlDatabase[urlShort] = {};
   urlDatabase[urlShort]['longURL'] = req.body.urlLong;
+  urlDatabase[urlShort]['userID'] = user_id;
   res.redirect(`/urls/${urlShort}`);
 });
 
@@ -149,18 +155,15 @@ app.post('/login', (req, res) => {
     return res.sendStatus(403);
   }
   const user_id = lookUpIdByEmail(email);
-  res.cookie("user_id", user_id);
+  req.session.user_id = user_id;
   res.redirect('urls');
 })
 
 app.post('/logout', (req, res) => {
   const user_id = req.body.user_id;
-  console.log(user_id);
-  for (let key in req.cookies) {
-    if (key === 'user_id' && req.cookies[key] === user_id){
-      res.clearCookie(key);
+  if  (req.session.user_id === user_id){
+    req.session = null
     }
-  }
   res.redirect('urls');
 })
 
@@ -176,7 +179,6 @@ app.post('/register', (req, res) => {
   users[id]['id'] = id;
   users[id]['email'] = email;
   users[id]['password'] = hashedPassword;
-  res.cookie("user_id", id);
   console.log(users);
   res.redirect('urls');
 })
@@ -226,8 +228,8 @@ const lookUpIdByEmail = (email) => {
 }
 
 const lookUpUserById = (id) => {
-  if (users[userKey] !== undefined) {
-      return users[userKey];
+  if (users[id] !== undefined) {
+      return users[id];
   }
   return false;
 }

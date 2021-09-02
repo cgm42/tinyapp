@@ -30,11 +30,11 @@
           <% } else {%>
         <% for(let url in userURLDatabase) { %>
           <tr>
-            <td><a><%= url %></a></td>
+            <td><a href="/u/<%= url %>"><%= url %></a></td>
             <td><a><%= userURLDatabase[url]['longURL'] %></a></td>
             
-            <td><a href='urls/<%= url %>' ><button class="btn btn-primary">Edit</button> </a></td>
-            <td><form method="POST" action="urls/<%= url %>/delete">
+            <td><a href='/urls/<%= url %>'> <button class="btn btn-primary">Edit</button> </a></td>
+            <td><form method="POST" action="/urls/<%= url %>/delete">
             <button type="submit" class="btn btn-primary">Delete</button>
             </form></td>
           </tr>
