@@ -4,7 +4,8 @@ const app = express();
 const morgan = require('morgan');
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+const {getUserByEmail} = require('./helper')
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
@@ -150,14 +151,14 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (emailDontExist(email)) {
-    return res.status(403).send("");
+    return res.status(401).send("Email doesn't exist");//TODO:
   } else if (!passwordCorrect(email, password)) {
-    return res.sendStatus(403);
+    return res.statuss(401).send('Email or password incorrect');//TODO:
   }
   const user = getUserByEmail(email, users);
   console.log(user['id']);
   req.session.user_id = user['id'];
-  res.redirect('urls');
+  res.redirect('urls');//TODO:
 })
 
 app.post('/logout', (req, res) => {
@@ -169,18 +170,22 @@ app.post('/logout', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-  console.log(users);
   const email = req.body.email;
   const password = req.body.password;
   if (email === "" || password == "") return res.status(404).send('Email or password invalid');
   if (!emailDontExist(email)) return res.status(400).send('Email already registered');
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const id = generateRandomString();
-  users[id] = {};
-  users[id]['id'] = id;
-  users[id]['email'] = email;
-  users[id]['password'] = hashedPassword;
-  console.log(users);
+  bcrypt.genSalt(10)
+  .then((salt) => {
+    return bcrypt.hash(password, salt)
+  })
+  .then((hash) => {
+    const id = generateRandomString();
+    users[id] = {};
+    users[id]['id'] = id;
+    users[id]['email'] = email;
+    users[id]['password'] = hash;
+    req.session.user_id = user['id'];
+  })
   res.redirect('urls');
 })
 
@@ -219,14 +224,6 @@ const passwordCorrect = (email, password) => {
   return false;
 }
 
-const getUserByEmail = (email, users) => {
-  for (const userKey in users) {
-    if (users[userKey]['email'] == email) {
-      return users[userKey];
-    }
-  }
-  return false;
-}
 
 const lookUpUserById = (id) => {
   if (users[id] !== undefined) {

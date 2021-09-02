@@ -15,6 +15,11 @@
     <h3>My URLs</h3>
     <table class="table">
       <thead>
+        <% if (user === undefined) {%>  
+          <div class="alert alert-danger" role="alert">
+            Not logged in!
+          </div>
+          <% } else {%>
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
@@ -23,11 +28,6 @@
         </tr>
       </thead>
       <tbody>
-        <% if (user === undefined) {%>  
-          <div class="alert alert-danger" role="alert">
-            Not logged in!
-          </div>
-          <% } else {%>
         <% for(let url in userURLDatabase) { %>
           <tr>
             <td><a href="/u/<%= url %>"><%= url %></a></td>
