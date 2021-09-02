@@ -32,10 +32,6 @@ const users = {
   },
  
 }
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) res.status(404).send('URL not found');
@@ -63,7 +59,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (req.session.user_id === undefined) {
-    return res.status(`401`).send('Not logged in');
+    return res.status(`401`).send('<html><h1>Not logged in<h1><html>');//TODO:
   }
   if (urlDatabase[req.params.shortURL] === undefined) {
     return res.status(`401`).send('Invalid URL');
@@ -100,7 +96,8 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => { 
-  if (!req.session.user_id) {
+  
+  if (!req.session.user_id || req.session.user_id === null) {
     return res.status(`401`).send('Not logged in');
   }
   if (!urlDatabase[req.params.shortURL]) {
@@ -114,11 +111,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:shortURL", (req, res) => { //check for bugs
-  if (req.session.user_id === undefined) {
+app.post("/urls/:shortURL", (req, res) => { 
+  console.log('req.session.user_id :>> ', req.session.user_id);
+  if (!req.session.user_id) {
     return res.status(`401`).send('Not logged in');
   }
-  if (urlDatabase[req.params.shortURL] === undefined) {
+  if (!urlDatabase[req.params.shortURL]) {
     return res.status(`401`).send('Invalid URL');
   }
   if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
@@ -130,15 +128,10 @@ app.post("/urls/:shortURL", (req, res) => { //check for bugs
   res.redirect(`/urls/`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-
 app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
-  if (user_id === undefined && !lookUpUserById(user_id)) {
-    return res.redirect('/login');
+  if (!user_id || !lookUpUserById(user_id)) {
+    return res.status(401).send("No access. Try logging in. ")
   }
   const urlShort = generateRandomString();
   urlDatabase[urlShort] = {};
@@ -153,7 +146,7 @@ app.post('/login', (req, res) => {
   if (emailDontExist(email)) {
     return res.status(401).send("Email doesn't exist");//TODO:
   } else if (!passwordCorrect(email, password)) {
-    return res.statuss(401).send('Email or password incorrect');//TODO:
+    return res.status(401).send('Email or password incorrect');//TODO:
   }
   const user = getUserByEmail(email, users);
   console.log(user['id']);
@@ -179,13 +172,13 @@ app.post('/register', (req, res) => {
     return bcrypt.hash(password, salt)
   })
   .then((hash) => {
-    const id = generateRandomString();
-    users[id] = {};
     users[id]['id'] = id;
     users[id]['email'] = email;
     users[id]['password'] = hash;
-    req.session.user_id = user['id'];
   })
+  const id = generateRandomString();
+  users[id] = {};
+  req.session.user_id = id;
   res.redirect('urls');
 })
 
