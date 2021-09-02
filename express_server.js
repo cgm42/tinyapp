@@ -154,8 +154,9 @@ app.post('/login', (req, res) => {
   } else if (!passwordCorrect(email, password)) {
     return res.sendStatus(403);
   }
-  const user_id = lookUpIdByEmail(email);
-  req.session.user_id = user_id;
+  const user = getUserByEmail(email, users);
+  console.log(user['id']);
+  req.session.user_id = user['id'];
   res.redirect('urls');
 })
 
@@ -218,10 +219,10 @@ const passwordCorrect = (email, password) => {
   return false;
 }
 
-const lookUpIdByEmail = (email) => {
+const getUserByEmail = (email, users) => {
   for (const userKey in users) {
     if (users[userKey]['email'] == email) {
-      return users[userKey]['id'];
+      return users[userKey];
     }
   }
   return false;
