@@ -30,7 +30,7 @@
           <% } else {%>
         <% for(let url in userURLDatabase) { %>
           <tr>
-            <td><a href='#'><%= url %></a></td>
+            <td><a><%= url %></a></td>
             <td><a><%= userURLDatabase[url]['longURL'] %></a></td>
             
             <td><a href='urls/<%= url %>' ><button class="btn btn-primary">Edit</button> </a></td>

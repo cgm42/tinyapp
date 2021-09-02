@@ -64,7 +64,16 @@ app.get("/urls/new", (req, res) => {
   });
 });
 
-app.get("/urls/:shortURL", (req, res) => {
+app.get("/urls/:shortURL", (req, res) => {//to be updated
+  if (req.cookies['user_id'] === undefined) {
+    return res.status(`401`).send('Not logged in');
+  }
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    return res.status(`401`).send('Invalid URL');
+  }
+  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) {
+    return res.status(`401`).send('Access only granted to URL creator');  
+  }
    const templateVars = {
     urlShort: req.params.shortURL,
     urlLong: urlDatabase[req.params.shortURL]['longURL'],
@@ -93,15 +102,32 @@ app.get("/login", (req, res) => {
   });
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => { //to be updated
-  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) return res.status(`401`).send('No access');
+app.post("/urls/:shortURL/delete", (req, res) => { 
+  if (req.cookies['user_id']) {
+    return res.status(`401`).send('Not logged in');
+  }
+  if (urlDatabase[req.params.shortURL]) {
+    return res.status(`401`).send('Invalid URL');
+  }
+  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) {
+    return res.status(`401`).send('Access only granted to URL creator');  
+  }
   delete urlDatabase[req.params.shortURL];
   console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:id", (req, res) => { //to be updated
-  if (req.cookies['user_id'] !== urlDatabase[req.params.id]['userID']) return res.status(`401`).send('No access');  urlDatabase[req.params.id]['longURL'] = req.body.urlLong;
+app.post("/urls/:shortURL", (req, res) => { 
+  if (req.cookies['user_id']) {
+    return res.status(`401`).send('Not logged in');
+  }
+  if (urlDatabase[req.params.shortURL]) {
+    return res.status(`401`).send('Invalid URL');
+  }
+  if (req.cookies['user_id'] !== urlDatabase[req.params.shortURL]['userID']) {
+    return res.status(`401`).send('Access only granted to URL creator');  
+  }
+  urlDatabase[req.params.id]['longURL'] = req.body.urlLong;
   urlDatabase[req.params.id]['userID'] = req.cookies['user_id'];
   res.redirect(`/urls/`);
 });

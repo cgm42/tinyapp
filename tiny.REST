@@ -20,3 +20,10 @@ POST http://localhost:8080/logout
 
 ###
 POST http://localhost:8080/urls/b2xVn2/
+
+
+###
+POST http://localhost:8080/urls/9sm5xK/
+
+###
+POST http://localhost:8080/urls/9sm5xK/delete
