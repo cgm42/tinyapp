@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
-const {getUserByEmail} = require('./helper')
+const {getUserByEmail, getUniqueVisitorCountByLog} = require('./helper')
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
@@ -20,19 +20,16 @@ const urlDatabase = {
              userID: "user2RandomID",
              date: "2021-09-01",
              totalVisit: 10,
-             uniqueVisitors: [],
              log: []},
   "9sm5xK": {longURL:"http://www.oku.club",
              userID: "lmFOgr",
              date: "2021-08-31",
              totalVisit: 1,
-             uniqueVisitors: [],
              log: []},
   "8as3xW": {longURL:"http://www.npr.org",
             userID: "lmFOgr",
             date: "2021-09-02",
             totalVisit: 5,
-            uniqueVisitors: [], 
             log: []},
 };
 
@@ -47,13 +44,9 @@ const users = {
 
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) res.status(404).send('URL not found');
-  //TODO: 3. add timestamp and visitor_id
   urlDatabase[req.params.shortURL]['totalVisit'] += 1;
   if (!req.session.user_id) {
     req.session.user_id = generateRandomString();
-  }
-  if (!urlDatabase[req.params.shortURL]['uniqueVisitors'].includes(req.session.user_id)) {
-    urlDatabase[req.params.shortURL]['uniqueVisitors'].push(req.session.user_id);//TODO: filter
   }
   const tempVar = {
     timestamp: new Date(),
@@ -70,6 +63,7 @@ app.get("/urls", (req, res) => {
   res.render('urls_index', {
     userURLDatabase,
     user: users[user_id],
+    getUniqueVisitorCountByLog,
   });
 });
 
@@ -97,6 +91,7 @@ app.get("/urls/:shortURL", (req, res) => {
     urlShort: req.params.shortURL,
     urlObj: urlDatabase[req.params.shortURL],
     user: users[req.session.user_id],
+    
    }
   res.render('urls_show', templateVars);
 });
@@ -266,7 +261,7 @@ const urlsForUser = (userID) => {
       result[shortURLKey]['userID'] = urlDatabase[shortURLKey]['userID'];
       result[shortURLKey]['date'] = urlDatabase[shortURLKey]['date'];
       result[shortURLKey]['totalVisit'] = urlDatabase[shortURLKey]['totalVisit'];
-      result[shortURLKey]['uniqueVisitors'] = urlDatabase[shortURLKey]['uniqueVisitors'];
+      result[shortURLKey]['log'] = urlDatabase[shortURLKey]['log'];
     }
   }
   return result;  

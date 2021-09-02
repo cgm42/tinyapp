@@ -8,6 +8,12 @@ const getUserByEmail = (email, users) => {
   return undefined;
 }
 
+const getUniqueVisitorCountByLog = (log) => {
+  const result = new Set();
+  for (oneLog of log) {
+    result.add(oneLog['visitor_id']);
+  }
+  return result.size;
+}
 
-
-module.exports = { getUserByEmail,}
+module.exports = { getUserByEmail, getUniqueVisitorCountByLog}
