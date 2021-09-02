@@ -17,11 +17,20 @@ app.use(morgan('dev'));
 
 const urlDatabase = {
   "b2xVn2": {longURL:"http://www.cbc.ca",
-             userID: "user2RandomID"},
+             userID: "user2RandomID",
+             date: "2021-09-01",
+             totalVisit: 10,
+             uniqueVisitors: []},
   "9sm5xK": {longURL:"http://www.oku.club",
-             userID: "lmFOgr"},
+             userID: "lmFOgr",
+             date: "2021-08-31",
+             totalVisit: 1,
+             uniqueVisitors: []},
   "8as3xW": {longURL:"http://www.npr.org",
-             userID: "lmFOgr"},
+            userID: "lmFOgr",
+            date: "2021-09-02",
+            totalVisit: 5,
+            uniqueVisitors: []},
 };
 
 const users = {
@@ -35,6 +44,16 @@ const users = {
 
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) res.status(404).send('URL not found');
+  //TODO: 2. add to unique visit via cookie-session
+  //      3. add timestamp and visitor_id
+  urlDatabase[req.params.shortURL]['totalVisit'] += 1;
+  if (!req.session.user_id) {
+    req.session.user_id = generateRandomString();
+  }
+  if (!urlDatabase[req.params.shortURL]['uniqueVisitors'].includes(req.session.user_id)) {
+    urlDatabase[req.params.shortURL]['uniqueVisitors'].push(req.session.user_id);
+  }
+  console.log(urlDatabase[req.params.shortURL]);
   res.redirect(`${urlDatabase[req.params.shortURL]['longURL']}`);
 });
 
@@ -125,6 +144,9 @@ app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = {};
   urlDatabase[req.params.shortURL]['longURL'] = req.body.urlLong;
   urlDatabase[req.params.shortURL]['userID'] = req.session.user_id;
+  urlDatabase[req.params.shortURL]['date'] = new Date();
+  urlDatabase[req.params.shortURL]['totalVisit'] = 0;
+  urlDatabase[req.params.shortURL]['uniqueVisitors'] = [];
   res.redirect(`/urls/`);
 });
 
@@ -137,6 +159,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[urlShort] = {};
   urlDatabase[urlShort]['longURL'] = req.body.urlLong;
   urlDatabase[urlShort]['userID'] = user_id;
+  urlDatabase[urlShort]['date'] = new Date().toISOString().slice(0, 10);
+  console.log(urlDatabase[urlShort]);
   res.redirect(`/urls/${urlShort}`);
 });
 
@@ -172,14 +196,14 @@ app.post('/register', (req, res) => {
     return bcrypt.hash(password, salt)
   })
   .then((hash) => {
+    const id = generateRandomString();
+    req.session.user_id = id;
+    users[id] = {};
     users[id]['id'] = id;
     users[id]['email'] = email;
     users[id]['password'] = hash;
+    res.redirect('urls');
   })
-  const id = generateRandomString();
-  users[id] = {};
-  req.session.user_id = id;
-  res.redirect('urls');
 })
 
 app.listen(PORT, () => {
@@ -232,6 +256,9 @@ const urlsForUser = (userID) => {
       result[shortURLKey] = {};
       result[shortURLKey]['longURL'] = urlDatabase[shortURLKey]['longURL'];
       result[shortURLKey]['userID'] = urlDatabase[shortURLKey]['userID'];
+      result[shortURLKey]['date'] = urlDatabase[shortURLKey]['date'];
+      result[shortURLKey]['totalVisit'] = urlDatabase[shortURLKey]['totalVisit'];
+      result[shortURLKey]['uniqueVisitors'] = urlDatabase[shortURLKey]['uniqueVisitors'];
     }
   }
   return result;  

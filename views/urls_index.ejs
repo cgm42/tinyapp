@@ -23,6 +23,9 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Date Created</th>
+          <th scope="col">Total Visit</th>
+          <th scope="col">Unique Visit</th>
           <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
@@ -32,7 +35,10 @@
           <tr>
             <td><a href="/u/<%= url %>"><%= url %></a></td>
             <td><a><%= userURLDatabase[url]['longURL'] %></a></td>
-            
+            <!-- TODO: -->
+            <td><a><%= userURLDatabase[url]['date'] %></a></td>
+            <td><%= userURLDatabase[url]['totalVisit'] %></td>
+            <td><%= userURLDatabase[url]['uniqueVisitors'].length %></td>
             <td><a href='/urls/<%= url %>'> <button class="btn btn-primary">Edit</button> </a></td>
             <td><form method="POST" action="/urls/<%= url %>/delete">
             <button type="submit" class="btn btn-primary">Delete</button>
