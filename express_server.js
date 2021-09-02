@@ -3,37 +3,30 @@ const app = express();
 const morgan = require('morgan');
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieParser())
 app.use(morgan('dev'));
 
 const urlDatabase = {
-  "b2xVn2": {longURL:"http://www.lighthouselabs.ca",
+  "b2xVn2": {longURL:"http://www.cbc.ca",
              userID: "user2RandomID"},
   "9sm5xK": {longURL:"http://www.oku.club",
              userID: "uQXq7o"},
-  "8as3xW": {longURL:"http://www.plannedparenthood.org",
+  "8as3xW": {longURL:"http://www.npr.org",
              userID: "uQXq7o"},
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+  "lmFOgr": {
+    id: "lmFOgr", 
+    email: "qwe@qwe", 
+    password: "$2b$10$hMCnZwaMCxEGHi9bRQVKZOeUjsI74DNt3ah455Wao9c9mCy0osUjC"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  },
-  "uQXq7o": {
-    id: "uQXq7o", 
-    email: "123@321", 
-    password: "123"
-  }
+ 
 }
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
@@ -177,11 +170,12 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   if (email === "" || password == "") return res.status(404).send('Email or password invalid');
   if (!emailDontExist(email)) return res.status(400).send('Email already registered');
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const id = generateRandomString();
   users[id] = {};
   users[id]['id'] = id;
   users[id]['email'] = email;
-  users[id]['password'] = password;
+  users[id]['password'] = hashedPassword;
   res.cookie("user_id", id);
   console.log(users);
   res.redirect('urls');
@@ -215,7 +209,7 @@ const emailDontExist = (email) => {
 
 const passwordCorrect = (email, password) => {
   for (const userKey in users) {
-    if (users[userKey]['email'] == email && users[userKey]['password'] == password) {
+    if (users[userKey]['email'] == email && bcrypt.compareSync(password, users[userKey]['password'])) {
       return true;
     }
   }
