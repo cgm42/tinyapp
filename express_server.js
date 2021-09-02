@@ -20,17 +20,20 @@ const urlDatabase = {
              userID: "user2RandomID",
              date: "2021-09-01",
              totalVisit: 10,
-             uniqueVisitors: []},
+             uniqueVisitors: [],
+             log: []},
   "9sm5xK": {longURL:"http://www.oku.club",
              userID: "lmFOgr",
              date: "2021-08-31",
              totalVisit: 1,
-             uniqueVisitors: []},
+             uniqueVisitors: [],
+             log: []},
   "8as3xW": {longURL:"http://www.npr.org",
             userID: "lmFOgr",
             date: "2021-09-02",
             totalVisit: 5,
-            uniqueVisitors: []},
+            uniqueVisitors: [], 
+            log: []},
 };
 
 const users = {
@@ -44,15 +47,19 @@ const users = {
 
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) res.status(404).send('URL not found');
-  //TODO: 2. add to unique visit via cookie-session
-  //      3. add timestamp and visitor_id
+  //TODO: 3. add timestamp and visitor_id
   urlDatabase[req.params.shortURL]['totalVisit'] += 1;
   if (!req.session.user_id) {
     req.session.user_id = generateRandomString();
   }
   if (!urlDatabase[req.params.shortURL]['uniqueVisitors'].includes(req.session.user_id)) {
-    urlDatabase[req.params.shortURL]['uniqueVisitors'].push(req.session.user_id);
+    urlDatabase[req.params.shortURL]['uniqueVisitors'].push(req.session.user_id);//TODO: filter
   }
+  const tempVar = {
+    timestamp: new Date(),
+    visitor_id: req.session.user_id,
+  }
+  urlDatabase[req.params.shortURL]['log'].push(tempVar);
   console.log(urlDatabase[req.params.shortURL]);
   res.redirect(`${urlDatabase[req.params.shortURL]['longURL']}`);
 });
@@ -88,7 +95,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
    const templateVars = {
     urlShort: req.params.shortURL,
-    urlLong: urlDatabase[req.params.shortURL]['longURL'],
+    urlObj: urlDatabase[req.params.shortURL],
     user: users[req.session.user_id],
    }
   res.render('urls_show', templateVars);
@@ -169,7 +176,8 @@ app.post('/login', (req, res) => {
   const password = req.body.password;
   if (emailDontExist(email)) {
     return res.status(401).send("Email doesn't exist");//TODO:
-  } else if (!passwordCorrect(email, password)) {
+  } 
+  if (!passwordCorrect(email, password)) {
     return res.status(401).send('Email or password incorrect');//TODO:
   }
   const user = getUserByEmail(email, users);
@@ -214,11 +222,11 @@ const generateRandomString = () => {
   const result = [];
   while (result.length < 6) {
     let rand;
-    if(Math.random() < 10 / (10 + 26 * 2)) { //assign number probability in addition to alphabet
-      rand = Math.floor(Math.random() * 10);
+    if(Math.random() < 10 / (10 + 26 * 2)) { //play alphanumeric lottery
+      rand = Math.floor(Math.random() * 10);//it's a number
     } else {
-      rand = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
-      if(Math.random() > 0.5) rand = rand.toLowerCase();
+      rand = String.fromCharCode(Math.floor(Math.random() * 26) + 65);//it's a letter
+      if(Math.random() > 0.5) rand = rand.toLowerCase();//it's a lowercase letter
     }
     result.push(rand);
   }
