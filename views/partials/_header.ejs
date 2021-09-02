@@ -18,6 +18,8 @@
               <button class="btn btn-outline-dark nav-item" type="submit" >Sign in</button>
               </div>
             </form>  -->
+            <a class="nav-item nav-link" href="/login">Login</a>
+            <a class="nav-item nav-link" href="/register">Register</a>
           <% } else { %> 
           <div class="nav-item nav-link" >Logged in as <%= user['email'] %>!</div>
           <form  class="nav justify-content-end" action="/logout" method="POST">
