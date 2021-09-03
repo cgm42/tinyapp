@@ -13,6 +13,9 @@
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= urlObj['longURL'] %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= urlShort %>"><%= urlShort %></a></p>
+        <p class="card-text">Date Created: <a><%= urlObj['date'] %></a></p>
+        <p class="card-text">Total Clicks: <a><%= urlObj['totalVisit'] %></a></p>
+        <p class="card-text">Numbers of Visitors: <a><%= getUniqueVisitorCountByLog(urlObj['log']) %></a></p>
       </div>
       <h3>Update TinyURL</h3>
       <form class="card-body" action="<%= urlShort %>?_method=PUT" method="POST">
