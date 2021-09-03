@@ -18,6 +18,9 @@ const salt = 'tomlei90@gmail.com'
   })
   // });
 
+
+
+
   // bcrypt.genSalt(10)
   //   .then((salt) => {
   //     console.log('salt :>> ', salt);

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "./node_modules/.bin/nodemon -L express_server.js",
     "test": "./node_modules/mocha/bin/mocha"
-    },
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cgm42/tinyapp.git"
@@ -24,6 +24,7 @@
     "cookie-session": "^1.4.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
+    "method-override": "^3.0.0",
     "morgan": "^1.10.0"
   },
   "devDependencies": {

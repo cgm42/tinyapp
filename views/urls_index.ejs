@@ -39,7 +39,7 @@
             <td><%= userURLDatabase[url]['totalVisit'] %></td>
             <td><%= getUniqueVisitorCountByLog(userURLDatabase[url]['log']) %></td>
             <td><a href='/urls/<%= url %>'> <button class="btn btn-primary">Edit</button> </a></td>
-            <td><form method="POST" action="/urls/<%= url %>/delete">
+            <td><form method="POST" action="/urls/<%= url %>/?_method=DELETE">
             <button type="submit" class="btn btn-primary">Delete</button>
             </form></td>
           </tr>

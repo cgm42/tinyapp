@@ -1,5 +1,6 @@
 const cookieSession = require('cookie-session');
 const express = require("express");
+const methodOverride = require('method-override');
 const app = express();
 const morgan = require('morgan');
 const PORT = 8080; // default port 8080
@@ -12,7 +13,8 @@ app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   keys: ["meowmIsHere"],
-}))
+}));
+app.use(methodOverride('_method'));
 app.use(morgan('dev'));
 
 const urlDatabase = {
@@ -115,23 +117,7 @@ app.get("/login", (req, res) => {
   });
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => { 
-  
-  if (!req.session.user_id || req.session.user_id === null) {
-    return res.status(`401`).send('Not logged in');
-  }
-  if (!urlDatabase[req.params.shortURL]) {
-    return res.status(`401`).send('Invalid URL');
-  }
-  if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
-    return res.status(`401`).send('Access only granted to URL creator');  
-  }
-  delete urlDatabase[req.params.shortURL];
-  console.log(urlDatabase);
-  res.redirect(`/urls`);
-});
-
-app.post("/urls/:shortURL", (req, res) => { 
+app.put("/urls/:shortURL", (req, res) => { //update
   console.log('req.session.user_id :>> ', req.session.user_id);
   if (!req.session.user_id) {
     return res.status(`401`).send('Not logged in');
@@ -142,16 +128,11 @@ app.post("/urls/:shortURL", (req, res) => {
   if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
     return res.status(`401`).send('Access only granted to URL creator');  
   }
-  urlDatabase[req.params.shortURL] = {};
   urlDatabase[req.params.shortURL]['longURL'] = req.body.urlLong;
-  urlDatabase[req.params.shortURL]['userID'] = req.session.user_id;
-  urlDatabase[req.params.shortURL]['date'] = new Date();
-  urlDatabase[req.params.shortURL]['totalVisit'] = 0;
-  urlDatabase[req.params.shortURL]['uniqueVisitors'] = [];
   res.redirect(`/urls/`);
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls", (req, res) => { //create
   const user_id = req.session.user_id;
   if (!user_id || !lookUpUserById(user_id)) {
     return res.status(401).send("No access. Try logging in. ")
@@ -161,6 +142,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[urlShort]['longURL'] = req.body.urlLong;
   urlDatabase[urlShort]['userID'] = user_id;
   urlDatabase[urlShort]['date'] = new Date().toISOString().slice(0, 10);
+  urlDatabase[urlShort]['totalVisit'] = 0;
+  urlDatabase[urlShort]['log'] = [];
   console.log(urlDatabase[urlShort]);
   res.redirect(`/urls/${urlShort}`);
 });
@@ -207,6 +190,22 @@ app.post('/register', (req, res) => {
     res.redirect('urls');
   })
 })
+
+app.delete("/urls/:shortURL/", (req, res) => { 
+  
+  if (!req.session.user_id || req.session.user_id === null) {
+    return res.status(`401`).send('Not logged in');
+  }
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.status(`401`).send('Invalid URL');
+  }
+  if (req.session.user_id !== urlDatabase[req.params.shortURL]['userID']) {
+    return res.status(`401`).send('Access only granted to URL creator');  
+  }
+  delete urlDatabase[req.params.shortURL];
+  console.log(urlDatabase);
+  res.redirect(`/urls`);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
