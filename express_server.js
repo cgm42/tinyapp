@@ -17,7 +17,7 @@ app.use(methodOverride('_method'));
 
 const urlDatabase = {
   "b2xVn2": {longURL:"http://www.cbc.ca",
-    userID: "user2RandomID",
+    userID0: "lmFOgr",
     date: "2021-09-01",
     totalVisit: 0,
     log: [],},
@@ -36,7 +36,7 @@ const urlDatabase = {
 const users = {
   "lmFOgr": {
     id: "lmFOgr",
-    email: "qwe@qwe",
+    email: "sample@user.com",
     password: "$2b$10$hMCnZwaMCxEGHi9bRQVKZOeUjsI74DNt3ah455Wao9c9mCy0osUjC"
   },
  
@@ -62,7 +62,6 @@ app.get("/u/:shortURL", (req, res) => {
     visitor_id: req.session.user_id,
   };
   urlDatabase[shortURL]['log'].push(tempVar);
-  console.log(urlDatabase[shortURL]);
   res.redirect(`${urlDatabase[shortURL]['longURL']}`);
 });
 
@@ -183,7 +182,6 @@ app.post('/login', (req, res) => {
     return res.status(401).send('Email or password incorrect');
   }
   const user = getUserByEmail(email, users);
-  console.log(user['id']);
   req.session.user_id = user['id'];
   res.redirect('urls');
 });
