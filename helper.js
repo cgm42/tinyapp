@@ -8,12 +8,12 @@
  */
 const getUserByEmail = (email, users) => {
   for (const userKey in users) {
-    if (users[userKey]['email'] == email) {
+    if (users[userKey]['email'] === email) {
       return users[userKey];
     }
   }
   return undefined;
-}
+};
 
 /**
  * Returns a count of unique visitors in the log
@@ -23,12 +23,12 @@ const getUserByEmail = (email, users) => {
  */
 const getUniqueVisitorCountByLog = (log) => {
   const result = new Set();
-  for (oneLog of log) {
+  for (let oneLog of log) {
     result.add(oneLog['visitor_id']);
   }
   return result.size;
-}
+};
 
 
 
-module.exports = { getUserByEmail, getUniqueVisitorCountByLog}
+module.exports = { getUserByEmail, getUniqueVisitorCountByLog};

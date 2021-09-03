@@ -5,28 +5,28 @@ const bcrypt = require('bcryptjs');
 let password = "peach";
 console.log('password :>> ', password);
 
-const salt = 'tomlei90@gmail.com'
-  // bcrypt.genSalt(10, (err, salt) => {
-  //   console.log('salt :>> ', salt);
-  bcrypt.hash(password, salt, (err, hash) => {
-    const hashedPassword = hash;
-    console.log('hashedPassword :>> ', hashedPassword);
-  })
-  bcrypt.hash(password, salt, (err, hash) => {
-    const hashedPassword = hash;
-    console.log('hashedPassword :>> ', hashedPassword);
-  })
-  // });
+const salt = 'tomlei90@gmail.com';
+// bcrypt.genSalt(10, (err, salt) => {
+//   console.log('salt :>> ', salt);
+bcrypt.hash(password, salt, (err, hash) => {
+  const hashedPassword = hash;
+  console.log('hashedPassword :>> ', hashedPassword);
+});
+bcrypt.hash(password, salt, (err, hash) => {
+  const hashedPassword = hash;
+  console.log('hashedPassword :>> ', hashedPassword);
+});
+// });
 
 
 
 
-  // bcrypt.genSalt(10)
-  //   .then((salt) => {
-  //     console.log('salt :>> ', salt);
-  //     return bcrypt.hash(password, salt)
-  //   })
-  //   .then((hash) => {
-  //     const hashedPassword = hash;
-  //     console.log('hashedPassword :>> ', hashedPassword);
-  //   })
+// bcrypt.genSalt(10)
+//   .then((salt) => {
+//     console.log('salt :>> ', salt);
+//     return bcrypt.hash(password, salt)
+//   })
+//   .then((hash) => {
+//     const hashedPassword = hash;
+//     console.log('hashedPassword :>> ', hashedPassword);
+//   })
