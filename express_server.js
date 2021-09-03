@@ -2,7 +2,6 @@ const cookieSession = require('cookie-session');
 const express = require("express");
 const methodOverride = require('method-override');
 const app = express();
-const morgan = require('morgan');
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
@@ -15,7 +14,6 @@ app.use(cookieSession({
   keys: ["meowmIsHere"],
 }));
 app.use(methodOverride('_method'));
-app.use(morgan('dev'));
 
 const urlDatabase = {
   "b2xVn2": {longURL:"http://www.cbc.ca",
