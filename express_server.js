@@ -20,17 +20,17 @@ const urlDatabase = {
              userID: "user2RandomID",
              date: "2021-09-01",
              totalVisit: 10,
-             log: []},
+             log: [],},
   "9sm5xK": {longURL:"http://www.oku.club",
              userID: "lmFOgr",
              date: "2021-08-31",
              totalVisit: 1,
-             log: []},
+             log: [],},
   "8as3xW": {longURL:"http://www.npr.org",
             userID: "lmFOgr",
             date: "2021-09-02",
             totalVisit: 5,
-            log: []},
+            log: [],},
 };
 
 const users = {
@@ -79,7 +79,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (req.session.user_id === undefined) {
-    return res.status(`401`).send('<html><h1>Not logged in<h1><html>');//TODO:
+    return res.status(`401`).send('<html><h1>Not logged in<h1><html>');
   }
   if (urlDatabase[req.params.shortURL] === undefined) {
     return res.status(`401`).send('Invalid URL');
@@ -91,7 +91,6 @@ app.get("/urls/:shortURL", (req, res) => {
     urlShort: req.params.shortURL,
     urlObj: urlDatabase[req.params.shortURL],
     user: users[req.session.user_id],
-    
    }
   res.render('urls_show', templateVars);
 });
@@ -178,7 +177,7 @@ app.post('/login', (req, res) => {
   const user = getUserByEmail(email, users);
   console.log(user['id']);
   req.session.user_id = user['id'];
-  res.redirect('urls');//TODO:
+  res.redirect('urls');
 })
 
 app.post('/logout', (req, res) => {
